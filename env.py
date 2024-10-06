@@ -32,6 +32,8 @@ class SimpleEnv(MiniGridEnv):
         approach_chest = 7
         approach_tree = 8
         approach_iron_ore = 9
+        approach_tree = 8
+        approach_iron_ore = 9
 
     def __init__(
             self,
@@ -327,7 +329,7 @@ class SimpleEnv(MiniGridEnv):
                         else:
                             reward = 5
                     else:  # SPARSE reward: No reward until the final goal state
-                        reward = 0
+                        reward = -0.1
             return self.get_obs(), reward, terminated, truncated, {}
 
         # Action for opening the chest
@@ -372,13 +374,16 @@ class SimpleEnv(MiniGridEnv):
                     # Update the lidar observation and inventory
                     self.grid.set(*fwd_pos, None)  # Remove the object from the grid
                     # reward = 1  # Reward for collecting the resource
-                    if self.collected_resource_episodes[resource_name] < self.max_reward_episodes:
-                        reward = 10  # Reward for crafting the sword
+                    if self.reward_type == RewardType.SPARSE:
+                        reward = -0.1
                     else:
-                        reward = 1
+                        if self.collected_resource_episodes[resource_name] < self.max_reward_episodes:
+                            reward = 10  # Reward for crafting the sword
+                        else:
+                            reward = 1
                     self.cumulative_reward += reward
                 else:
-                    reward = 0.0  # Penalize redundant collection within the same episode
+                    reward = -0.1  # Penalize redundant collection within the same episode
             return self.get_obs(), reward, terminated, truncated, {}
 
         # Handle basic actions (move, turn, etc.) using the parent class
